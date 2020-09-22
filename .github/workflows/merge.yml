@@ -1,0 +1,30 @@
+name: Auto pull requests
+on:
+  push:
+    branches: [development]
+  
+jobs:
+  auto-pull-request:
+    name: PullRequestAction
+    runs-on: ubuntu-latest
+    steps:
+      - name: pull-request-action
+        uses: vsoch/pull-request-action@1.0.6
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          BRANCH_PREFIX: "development"
+          PULL_REQUEST_BRANCH: "master"
+          PULL_REQUEST_TITLE: ""
+          PULL_REQUEST_BODY: ""
+  merge-branch:
+    needs: auto-pull-request
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: everlytic/branch-merge@1.1.0
+        with:
+          github_token: ${{ github.token }}
+          source_ref: ${{ github.ref }}
+          target_branch: 'master'
+          commit_message_template: 'Merged {source_ref} into target {target_branch}'
+          blocking-labels: do not merge
